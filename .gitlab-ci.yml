@@ -2,6 +2,10 @@ stages:
   - docker
 
 build-docker:
+  variables:
+    DOCKER_DRIVER: overlay
+  services:
+    - docker:dind
   stage: docker
   script:
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
