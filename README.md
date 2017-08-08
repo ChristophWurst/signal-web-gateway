@@ -18,15 +18,19 @@ Now you need to register like described at [janimo's wiki](https://github.com/ja
 Edit the `.config/config.yml` to suit your needs and start the registration:
 
 ```
-docker run --rm -it --name signal-web-gateway -v $PWD/.config:/signal/.config -v $PWD/.storage:/signal/.storage -p 5000:5000 registry.gitlab.com/morph027/signal-web-gateway:master /bin/sh
+docker run --rm -it -v $PWD/.config:/signal/.config -v $PWD/.storage:/signal/.storage registry.gitlab.com/morph027/signal-web-gateway:master /bin/sh
 ./textsecure
+# confirm code
+# ctrl+c
+# ctrl+d
 ```
+
+A cool way to register test numbers is [SMSReceiveFree](https://smsreceivefree.com/).
 
 ## Run
 
-
 ```
-docker run -d --name signal-web-gateway -v $PWD/.config:/signal/.config -v $PWD/.storage:/signal/.storage -p 5000:5000 registry.gitlab.com/morph027/signal-web-gateway:master
+docker run -d --name signal-web-gateway --restart always -v $PWD/.config:/signal/.config -v $PWD/.storage:/signal/.storage -p 5000:5000 registry.gitlab.com/morph027/signal-web-gateway:master
 ```
 
 ## Access
