@@ -9,28 +9,33 @@ RUN apk --no-cache add mercurial git \
 
 FROM alpine:latest
 
-RUN apk --no-cache add \
-      tini \
-      py-pip \
-      ca-certificates
-
-RUN addgroup -S signal
-
-RUN adduser -S -G signal -h /signal signal
-
 WORKDIR /signal
 
 COPY --from=builder /output /signal
 
 COPY start.py /signal/start.py
 
-USER signal
+COPY entrypoint.sh /
 
-RUN pip install --user \
+RUN apk --no-cache add \
+      sudo \
+    && addgroup signal \
+    && adduser -G signal -h /signal -s /bin/sh -D signal \
+    && echo "%signal ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/signal \
+    && chmod 400 /etc/sudoers.d/signal \
+    && apk --no-cache add \
+      tini \
+      py-pip \
+      ca-certificates \
+    && sudo -u signal -H pip install --user \
       flask \
       gunicorn \
     && rm -rf .cache
 
-ENTRYPOINT ["/sbin/tini", "--"]
+USER signal
 
-CMD ["/signal/.local/bin/gunicorn", "-w", "1", "-b", "0.0.0.0:5000", "start:app"]
+ENTRYPOINT ["/sbin/tini", "-g", "--"]
+
+CMD ["/entrypoint.sh"]
+
+EXPOSE 5000
