@@ -1,6 +1,6 @@
 # Signal Web Gateway
 
-Putting [janimo's](https://github.com/janimo/textsecure) behind a Flask/Gunicorn server to have a web gateway.
+Putting [janimo's](https://github.com/janimo/textsecure) Signal client behind a web server to have a web gateway for other apps (reporting, monitoring, ...).
 
 ## Prepare config and storage
 
@@ -8,8 +8,9 @@ If you do not already have a config file, just create one like this:
 
 ```
 mkdir .config .storage
+touch .config/contacts.yml
 sudo chown -R 1000:1000 .config .storage # needs to belong to signal user
-docker run --rm -it registry.gitlab.com/morph027/signal-web-gateway:master cat .config/config.yml > .config/config.yml
+docker run --rm -it -v $PWD/.config:/signal/.config registry.gitlab.com/morph027/signal-web-gateway:master sh -c "cat .config/config.yml > /signal/.config/config.yml"
 ```
 
 ## Register
