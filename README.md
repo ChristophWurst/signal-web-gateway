@@ -2,6 +2,8 @@
 
 Putting [janimo's](https://github.com/janimo/textsecure) Signal client behind a web server to have a web gateway for other apps (reporting, monitoring, ...).
 
+You might want to check the [wiki](https://gitlab.com/morph027/signal-web-gateway/wikis/home) for more stuff (like a mail-2-signal addon).
+
 ## Prepare config and storage
 
 If you do not already have a config file, just create one like this:
