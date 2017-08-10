@@ -1,5 +1,6 @@
 import os
 import json
+import re
 from subprocess import Popen
 from distutils.util import strtobool
 from flask import Flask, request, redirect, url_for
@@ -33,10 +34,8 @@ def get_message():
         if message:
             recipient = request.form.get('to')
             if recipient:
-                try:
-                    group = strtobool(request.form.get('group'))
-                except:
-                    pass
+                if re.findall(r"([a-fA-F\d]{32})", recipient):
+                    group = True
                 try:
                     file = request.files['file']
                     if file:

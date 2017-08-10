@@ -55,7 +55,7 @@ curl -X POST -F file=@some-random-cat-picture.gif -F "to=+1337" -F "message=Test
 * Send to groups (assuming you're running against the docker container at your machine):
 
 ```
-curl -X POST -F "to=ff702f10bebfa2f1508deb475ded2d65" -F "group=True" -F "message=Test" http://localhost:5000
+curl -X POST -F "to=ff702f10bebfa2f1508deb475ded2d65" -F "message=Test" http://localhost:5000
 ```
 
 You can retrieve the groupid by having a look into `.storage/groups`
