@@ -16,12 +16,12 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-def send_message(message, recipient, group, filename=None):
+def send_message(message, recipient, filename=None):
     signal_cmd = "/signal/textsecure"
     signal_opts = [signal_cmd, '-to', recipient, '-message', message]
     if filename is not None:
         signal_opts.extend(['-attachment', filename])
-    if group:
+    if re.findall(r"([a-fA-F\d]{32})", recipient):
         signal_opts.extend(['-group'])
     Popen(signal_opts)
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
@@ -34,8 +34,6 @@ def get_message():
         if message:
             recipient = request.form.get('to')
             if recipient:
-                if re.findall(r"([a-fA-F\d]{32})", recipient):
-                    group = True
                 try:
                     file = request.files['file']
                     if file:
