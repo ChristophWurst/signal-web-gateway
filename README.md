@@ -11,8 +11,8 @@ If you do not already have a config file, just create one like this:
 ```
 mkdir .config .storage
 touch .config/contacts.yml
+docker run --rm -it registry.gitlab.com/morph027/signal-web-gateway:master cat .config/config.yml > .config/config.yml
 sudo chown -R 1000:1000 .config .storage # needs to belong to signal user
-docker run --rm -it -v $PWD/.config:/signal/.config registry.gitlab.com/morph027/signal-web-gateway:master sh -c "cat .config/config.yml > /signal/.config/config.yml"
 ```
 
 ## Register
