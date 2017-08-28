@@ -32,16 +32,15 @@ def get_message():
         group = False
         message = request.form.get('message')
         if message:
-            recipient = request.form.get('to')
+            recipient = request.form.get('to', False)
             if recipient:
-                try:
-                    file = request.files['file']
-                    if file:
-                        if allowed_file(file.filename):
-                            filename=secure_filename(file.filename)
-                            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                            return send_message(message, recipient, group, os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                except:
+                file = request.files.get('file', False)
+                if file:
+                    if allowed_file(file.filename):
+                        filename=secure_filename(file.filename)
+                        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                        return send_message(message, recipient, os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                else:
                     return send_message(message, recipient, group)
             else:
                 return json.dumps({'success':False, 'error':'no recipient'}), 500, {'ContentType':'application/json'}
