@@ -2,7 +2,9 @@
 
 Putting [janimo's](https://github.com/janimo/textsecure) Signal client behind a web server to have a web gateway for other apps (reporting, monitoring, ...).
 
-You might want to check the [wiki](https://gitlab.com/morph027/signal-web-gateway/wikis/home) for more stuff (like a mail-2-signal addon).
+You might want to check the [wiki](https://gitlab.com/morph027/signal-web-gateway/wikis/home) for more stuff (like a signal-web-gateway addon).
+
+This setup runs in Docker, so you can easily throw it into your swarm. If you want to run it standalone, just have a look at the bottom of this page.
 
 ## Prepare config and storage
 
@@ -63,3 +65,71 @@ You can retrieve the groupid by having a look into `.storage/groups`
 ## Security
 
 You might want to run this behind an reverse proxy like nginx to add some basic auth or (much better) run this inside Docker swarm with [Docker Flow Proxy](https://proxy.dockerflow.com) and [basic auth](https://proxy.dockerflow.com/swarm-mode-auto/#service-authentication) using secrets.
+
+## Standalone
+
+If you want to run this without Docker, you need to setup:
+
+* janimo's [go binary]([wiki](https://gitlab.com/morph027/signal-web-gateway/wikis/home))
+* a dedicated user
+* a python virtualenv for this user
+* python requirements
+* app
+* startup script (e.g. systemd unit file)
+
+### User
+
+```
+useradd -s /bin/bash -m signal
+```
+
+### Virtualenv + requirements
+
+```
+sudo -u signal -H virtualenv /home/signal/virtualenv
+sudo -u signal -H pip install flask gunicorn
+```
+
+### App
+
+```
+sudo -u signal -H git clone https://gitlab.com/morph027/signal-web-gateway /home/signal/signal-web-gateway
+```
+
+### Startup
+
+`/etc/systemd/system/signal-web-gateway.socket`:
+
+```
+[Unit]
+Description=signal-web-gateway gunicorn socket
+
+[Socket]
+ListenStream=/run/signal-web-gateway/socket
+
+[Install]
+WantedBy=sockets.target
+```
+
+`/etc/systemd/system/signal-web-gateway.service`:
+
+```
+[Unit]
+Description=signal-web-gateway daemon
+Requires=signal-web-gateway.socket
+After=network.target
+
+[Service]
+PIDFile=/run/signal-web-gateway/pid
+User=signal
+Group=signal
+RuntimeDirectory=signal-web-gateway
+WorkingDirectory=/home/signal/signal-web-gateway
+ExecStart=/home/signal/virtualenv/bin/gunicorn --pid /run/signal-web-gateway/pid --bind unix:/run/signal-web-gateway/socket signal-web-gateway:app
+ExecReload=/bin/kill -s HUP $MAINPID
+ExecStop=/bin/kill -s TERM $MAINPID
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
+```
