@@ -76,6 +76,7 @@ If you want to run this without Docker, you need to setup:
 * python requirements
 * app
 * startup script (e.g. systemd unit file)
+* reverse proxy (in case you want to secure using basic auth and tls, ...)
 
 ### User
 
@@ -97,6 +98,8 @@ sudo -u signal -H git clone https://gitlab.com/morph027/signal-web-gateway /home
 ```
 
 ### Startup
+
+This is an example which listens on a socket fot it's reverse proxy
 
 `/etc/systemd/system/signal-web-gateway.socket`:
 
@@ -133,3 +136,7 @@ PrivateTmp=true
 [Install]
 WantedBy=multi-user.target
 ```
+
+### Reverse proxy
+
+As there are plenty of proxy or webservers (e.g. nginx, apache, caddy, traefik,...), just pick your favourite one. Make sure to proxy requests to the socket at `/run/signal-web-gateway/socket`.
