@@ -1,7 +1,7 @@
 #!/bin/sh
 
 start() {
-  /signal/.local/bin/gunicorn -w  1 -b 0.0.0.0:5000 start:app
+  /signal/.local/bin/gunicorn -w  1 -b 0.0.0.0:5000 start:APP
 }
 
 stop() {
