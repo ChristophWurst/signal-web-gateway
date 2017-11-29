@@ -1,22 +1,26 @@
+#!/usr/bin/env python
+"""Signal Web Gateway"""
+
 import os
 import json
 import re
 from subprocess import Popen
-from distutils.util import strtobool
-from flask import Flask, request, redirect, url_for
+from flask import Flask, request
 from werkzeug.utils import secure_filename
 
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 UPLOAD_FOLDER = '/tmp'
+JSON_MESSAGE = os.getenv('JSON_MESSAGE', 'message')
 
-app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+APP = Flask(__name__)
 
 def allowed_file(filename):
+    """if uploaded filename is allowed"""
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def send_message(message, recipient, filename=None):
+    """send message via janimos textsecure binary"""
     signal_cmd = "/signal/textsecure"
     signal_opts = [signal_cmd, '-to', recipient, '-message', message]
     if filename is not None:
@@ -26,24 +30,28 @@ def send_message(message, recipient, filename=None):
     Popen(signal_opts)
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
-@app.route('/', methods=['POST','GET'])
-def get_message():
-    if request.method == 'POST':
-        group = False
-        message = request.form.get('message')
-        if message:
-            recipient = request.form.get('to', False)
-            if recipient:
-                file = request.files.get('file', False)
-                if file:
-                    if allowed_file(file.filename):
-                        filename=secure_filename(file.filename)
-                        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                        return send_message(message, recipient, os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                else:
-                    return send_message(message, recipient, group)
-            else:
-                return json.dumps({'success':False, 'error':'no recipient'}), 500, {'ContentType':'application/json'}
-        else:
-            return json.dumps({'success':False, 'error':'no message input'}), 500, {'ContentType':'application/json'}
-    return json.dumps({'success':False}), 500, {'ContentType':'application/json'}
+@APP.route('/', methods=['POST'])
+def multipart_formpost():
+    """handle multiform requests with possible file uploads"""
+    message = request.form.get('message')
+    if message:
+        recipient = request.form.get('to', False)
+        if recipient:
+            file = request.files.get('file', False)
+            if file:
+                if allowed_file(file.filename):
+                    filename = secure_filename(file.filename)
+                    file.save(os.path.join(UPLOAD_FOLDER, filename))
+                    return send_message(message, recipient, os.path.join(UPLOAD_FOLDER, filename))
+            return send_message(message, recipient)
+        return json.dumps({'success':False, 'error':'no recipient'}), 500, {'ContentType':'application/json'}
+    return json.dumps({'success':False, 'error':'no message input'}), 500, {'ContentType':'application/json'}
+
+
+@APP.route('/<recipient>', methods=['POST'])
+def json_datapost(recipient):
+    """handle json post data to specific recipient url"""
+    message = request.get_json()[JSON_MESSAGE]
+    if message:
+        return send_message(message, recipient)
+    return json.dumps({'success':False, 'error':'no message input'}), 500, {'ContentType':'application/json'}

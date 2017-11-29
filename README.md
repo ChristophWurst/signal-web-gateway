@@ -40,6 +40,8 @@ docker run -d --name signal-web-gateway --restart always -v $PWD/.config:/signal
 
 ## Access
 
+### Multipart form data (w/ image upload)
+
 Now you can just use curl to send messages using the form data `to`, `message`, `file` (optionally) and `group` (optionally):
 
 * Plain text (assuming you're running against the docker container at your machine):
@@ -61,6 +63,17 @@ curl -X POST -F "to=ff702f10bebfa2f1508deb475ded2d65" -F "message=Test" http://l
 ```
 
 You can retrieve the groupid by having a look into `.storage/groups`
+
+### JSON data to specific path
+
+If your sending app for whatever reasons is unable to specify form values and just posts json webhooks (Influx Kapacitor, Gitlab webhooks), you can post this data to a path containing the recipient (e.g. `/+1337` or `/ff702f10bebfa2f1508deb475ded2d65`).
+The gateway then tries to send the value from json key defined in environment variable `JSON_MESSAGE`.
+
+Example:
+
+```
+curl -X POST -d '{"message":"foo"}' http://localhost:5000/+1337
+```
 
 ## Security
 
