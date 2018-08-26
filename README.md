@@ -6,6 +6,8 @@ You might want to check the [wiki](https://gitlab.com/morph027/signal-web-gatewa
 
 This setup runs in Docker, so you can easily throw it into your swarm. If you want to run it standalone, just have a look at the bottom of this page.
 
+**You will need a spare phone number to use for registration!** (SIP numbers are fine)
+
 ## Prepare config and storage
 
 If you do not already have a config file, just create one like this:
@@ -73,6 +75,14 @@ Example:
 
 ```
 curl -X POST -d '{"message":"foo"}' http://localhost:5000/+1337
+```
+
+### Rekey in case of re-installing Signal
+
+If you (or someone) has re-installed Signal (or switched to a new mobile), the Signal app and the servers will create new keys and this gateway refuses to send messages due to the changed key. You can send a `DELETE` request to `/<recipient>` to delete the old key and receive messages again.
+
+```
+curl -X DELETE http://localhost:5000/491337420815
 ```
 
 ## Security

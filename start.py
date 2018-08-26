@@ -10,6 +10,7 @@ from werkzeug.utils import secure_filename
 
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 UPLOAD_FOLDER = '/tmp'
+SIGNAL_BASEDIR = '/signal'
 JSON_MESSAGE = os.getenv('JSON_MESSAGE', 'message')
 
 APP = Flask(__name__)
@@ -21,7 +22,7 @@ def allowed_file(filename):
 
 def send_message(message, recipient, filename=None):
     """send message via janimos textsecure binary"""
-    signal_cmd = "/signal/textsecure"
+    signal_cmd = SIGNAL_BASEDIR + '/textsecure'
     signal_opts = [signal_cmd, '-to', recipient, '-message', message]
     if filename is not None:
         signal_opts.extend(['-attachment', filename])
@@ -55,3 +56,12 @@ def json_datapost(recipient):
     if message:
         return send_message(message, recipient)
     return json.dumps({'success':False, 'error':'no message input'}), 500, {'ContentType':'application/json'}
+
+@APP.route('/<recipient>', methods=['DELETE'])
+def rekey(recipient):
+    """delete existing recipient key in case the user re-installed signal"""
+    if os.path.isfile(SIGNAL_BASEDIR + '/.storage/identity/remote_' + recipient):
+        os.remove(SIGNAL_BASEDIR + '/.storage/identity/remote_' + recipient)
+        return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
+    else:
+        return json.dumps({'success':False, 'error':'identity ' + recipient + ' not found'}), 500, {'ContentType':'application/json'}
