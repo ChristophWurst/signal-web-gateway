@@ -1,6 +1,7 @@
 FROM golang:alpine as builder
 
 RUN apk --no-cache add mercurial git \
+    && go get github.com/sirupsen/logrus \
     && go get github.com/morph027/textsecure/ \
     && cd src/github.com/morph027/textsecure/cmd/textsecure \
     && go build \
