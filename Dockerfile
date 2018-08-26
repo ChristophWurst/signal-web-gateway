@@ -1,10 +1,10 @@
 FROM golang:alpine as builder
 
 RUN apk --no-cache add mercurial git \
-    && go get github.com/janimo/textsecure/ \
-    && cd src/github.com/janimo/textsecure/cmd/textsecure \
+    && go get github.com/morph027/textsecure/ \
+    && cd src/github.com/morph027/textsecure/cmd/textsecure \
     && go build \
-    && mv /go/src/github.com/janimo/textsecure/cmd/textsecure /output \
+    && mv /go/src/github.com/morph027/textsecure/cmd/textsecure /output \
     && rm -f /output/main.go
 
 FROM alpine:latest
