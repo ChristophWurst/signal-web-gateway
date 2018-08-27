@@ -16,6 +16,8 @@ COPY --from=builder /output /signal
 
 COPY start.py /signal/start.py
 
+COPY requirements.txt /signal/
+
 COPY entrypoint.sh /
 
 RUN apk --no-cache add \
@@ -28,13 +30,8 @@ RUN apk --no-cache add \
       tini \
       py-pip \
       ca-certificates \
-      build-base \
-    && sudo -u signal -H pip install --user \
-      flask \
-      gunicorn \
-      pyyaml \
-    && rm -rf .cache \
-    && apk del build-base
+    && sudo -u signal -H pip install --user -r /signal/requirements.txt \
+    && rm -rf .cache
 
 USER signal
 
