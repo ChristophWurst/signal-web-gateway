@@ -80,6 +80,7 @@ def rekey(recipient):
         'error':'identity ' + recipient + ' not found'
         }), 500, {'ContentType':'application/json'}
 
+
 @APP.route('/groups', methods=['GET'])
 def list_groups():
     """list known groups"""
@@ -93,4 +94,16 @@ def list_groups():
     return json.dumps({
         'success':True,
         'groups': groups
+        }), 200, {'ContentType':'application/json'}
+
+
+@APP.route('/groups/<hexid>', methods=['GET'])
+def list_group(hexid):
+    """list group details"""
+    group = {}
+    with open(SIGNAL_BASEDIR + '/.storage/groups/' + hexid) as ymlfile:
+        group = yaml.load(ymlfile)
+    return json.dumps({
+        'success':True,
+        hexid: group
         }), 200, {'ContentType':'application/json'}
