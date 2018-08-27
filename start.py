@@ -77,10 +77,10 @@ def multipart_formpost():
                     filename = secure_filename(file.filename)
                     file.save(os.path.join(UPLOAD_FOLDER, filename))
                     return send_message(
-                               message,
-                               recipient,
-                               os.path.join(UPLOAD_FOLDER, filename)
-                           )
+                        message,
+                        recipient,
+                        os.path.join(UPLOAD_FOLDER, filename)
+                    )
             return send_message(message, recipient)
         return json.dumps({
             'success': False,
