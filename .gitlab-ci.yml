@@ -1,5 +1,21 @@
 stages:
+  - test
   - docker
+
+pylint:
+  stage: test
+  image: python:alpine
+  script:
+    - pip install pylint
+    - pylint start.py
+
+shellcheck:
+  stage: test
+  image: ubuntu:bionic
+  script:
+    - apt-get -qq update
+    - apt-get -qq -y install shellcheck
+    - shellcheck entrypoint.sh
 
 build-docker:
   variables:
