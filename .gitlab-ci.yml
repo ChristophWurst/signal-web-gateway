@@ -6,6 +6,7 @@ pylint:
   stage: test
   image: python:alpine
   script:
+    - pip install -r requirements.txt
     - pip install pylint
     - pylint start.py
 
