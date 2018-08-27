@@ -4,7 +4,7 @@
 import os
 import json
 import re
-from subprocess import Popen
+import subprocess
 import yaml
 from flask import Flask, request
 from werkzeug.utils import secure_filename
@@ -21,6 +21,15 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+
+def remote_id_untrusted(recipient):
+    """untrusted id found"""
+    return json.dumps({
+        'success':False,
+        'error':'remote identity ' + recipient + ' is not trusted'
+        }), 500, {'ContentType':'application/json'}
+
+
 def send_message(message, recipient, filename=None):
     """send message via janimos textsecure binary"""
     signal_cmd = SIGNAL_BASEDIR + '/textsecure'
@@ -29,7 +38,17 @@ def send_message(message, recipient, filename=None):
         signal_opts.extend(['-attachment', filename])
     if re.findall(r"([a-fA-F\d]{32})", recipient):
         signal_opts.extend(['-group'])
-    Popen(signal_opts)
+    process = subprocess.Popen(signal_opts,
+                               bufsize=0,
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE)
+    process_stderr = process.communicate()[1].decode('utf-8')
+    signal_stderr_regex_handlers = [
+        (r'status code 413', remote_id_untrusted),
+        ]
+    for regex, function in signal_stderr_regex_handlers:
+        if re.search(regex, process_stderr, re.IGNORECASE):
+            return function(recipient)
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
 @APP.route('/', methods=['POST'])
