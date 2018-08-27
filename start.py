@@ -4,7 +4,7 @@
 import os
 import json
 import re
-from subprocess import Popen
+import subprocess
 import yaml
 from flask import Flask, request
 from werkzeug.utils import secure_filename
@@ -16,10 +16,28 @@ JSON_MESSAGE = os.getenv('JSON_MESSAGE', 'message')
 
 APP = Flask(__name__)
 
+
 def allowed_file(filename):
     """if uploaded filename is allowed"""
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+def remote_id_untrusted():
+    """untrusted id found"""
+    return json.dumps({
+        'success': False,
+        'error': 'remote identity is not trusted'
+        }), 500, {'ContentType': 'application/json'}
+
+
+def ratelimit():
+    """untrusted id found"""
+    return json.dumps({
+        'success': False,
+        'error': 'signal api rate limit reached'
+        }), 413, {'ContentType': 'application/json'}
+
 
 def send_message(message, recipient, filename=None):
     """send message via janimos textsecure binary"""
@@ -29,8 +47,22 @@ def send_message(message, recipient, filename=None):
         signal_opts.extend(['-attachment', filename])
     if re.findall(r"([a-fA-F\d]{32})", recipient):
         signal_opts.extend(['-group'])
-    Popen(signal_opts)
-    return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
+    process = subprocess.Popen(signal_opts,
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE)
+    process_stderr = process.communicate()[1]
+    signal_stderr_regex_handlers = [
+        (r'Peer identity not trusted.+remote_\d+', remote_id_untrusted),
+        (r'status code 413', ratelimit),
+        ]
+    if process_stderr:
+        for regex, function in signal_stderr_regex_handlers:
+            if re.search(regex, process_stderr.decode('utf-8'), re.IGNORECASE):
+                return function()
+    return json.dumps({
+        'success': True
+        }), 200, {'ContentType': 'application/json'}
+
 
 @APP.route('/', methods=['POST'])
 def multipart_formpost():
@@ -44,16 +76,20 @@ def multipart_formpost():
                 if allowed_file(file.filename):
                     filename = secure_filename(file.filename)
                     file.save(os.path.join(UPLOAD_FOLDER, filename))
-                    return send_message(message, recipient, os.path.join(UPLOAD_FOLDER, filename))
+                    return send_message(
+                        message,
+                        recipient,
+                        os.path.join(UPLOAD_FOLDER, filename)
+                    )
             return send_message(message, recipient)
         return json.dumps({
-            'success':False,
-            'error':'no recipient'
-            }), 500, {'ContentType':'application/json'}
+            'success': False,
+            'error': 'no recipient'
+            }), 500, {'ContentType': 'application/json'}
     return json.dumps({
-        'success':False,
-        'error':'no message input'
-        }), 500, {'ContentType':'application/json'}
+        'success': False,
+        'error': 'no message input'
+        }), 500, {'ContentType': 'application/json'}
 
 
 @APP.route('/<recipient>', methods=['POST'])
@@ -63,22 +99,24 @@ def json_datapost(recipient):
     if message:
         return send_message(message, recipient)
     return json.dumps({
-        'success':False,
-        'error':'no message input'
-        }), 500, {'ContentType':'application/json'}
+        'success': False,
+        'error': 'no message input'
+        }), 500, {'ContentType': 'application/json'}
+
 
 @APP.route('/<recipient>', methods=['DELETE'])
 def rekey(recipient):
     """delete existing recipient key in case the user re-installed signal"""
-    if os.path.isfile(SIGNAL_BASEDIR + '/.storage/identity/remote_' + recipient):
-        os.remove(SIGNAL_BASEDIR + '/.storage/identity/remote_' + recipient)
+    identity_file = SIGNAL_BASEDIR + '/.storage/identity/remote_' + recipient
+    if os.path.isfile(identity_file):
+        os.remove(identity_file)
         return json.dumps({
-            'success':True
-            }), 200, {'ContentType':'application/json'}
+            'success': True
+            }), 200, {'ContentType': 'application/json'}
     return json.dumps({
-        'success':False,
-        'error':'identity ' + recipient + ' not found'
-        }), 500, {'ContentType':'application/json'}
+        'success': False,
+        'error': 'identity ' + recipient + ' not found'
+        }), 500, {'ContentType': 'application/json'}
 
 
 @APP.route('/groups', methods=['GET'])
@@ -92,9 +130,9 @@ def list_groups():
                 groups.update({group['hexid']: {}})
             groups[group['hexid']].update({'name': group['name']})
     return json.dumps({
-        'success':True,
+        'success': True,
         'groups': groups
-        }), 200, {'ContentType':'application/json'}
+        }), 200, {'ContentType': 'application/json'}
 
 
 @APP.route('/groups/<hexid>', methods=['GET'])
@@ -104,6 +142,6 @@ def list_group(hexid):
     with open(SIGNAL_BASEDIR + '/.storage/groups/' + hexid) as ymlfile:
         group = yaml.load(ymlfile)
     return json.dumps({
-        'success':True,
+        'success': True,
         hexid: group
-        }), 200, {'ContentType':'application/json'}
+        }), 200, {'ContentType': 'application/json'}
