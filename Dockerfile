@@ -28,10 +28,13 @@ RUN apk --no-cache add \
       tini \
       py-pip \
       ca-certificates \
+      build-base \
     && sudo -u signal -H pip install --user \
       flask \
       gunicorn \
-    && rm -rf .cache
+      pyyaml \
+    && rm -rf .cache \
+    && apk del build-base
 
 USER signal
 
