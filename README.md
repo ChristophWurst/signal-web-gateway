@@ -93,11 +93,11 @@ You might want to run this behind an reverse proxy like nginx to add some basic 
 
 If you want to run this without Docker, you need to setup:
 
-* janimo's [go binary]([wiki](https://gitlab.com/morph027/signal-web-gateway/wikis/home))
+* aebruno's updated fork of janimo's [go binary](https://github.com/aebruno/textsecure)
 * a dedicated user
 * a python virtualenv for this user
 * python requirements
-* app
+* the app itself
 * startup script (e.g. systemd unit file)
 * reverse proxy (in case you want to secure using basic auth and tls, ...)
 
