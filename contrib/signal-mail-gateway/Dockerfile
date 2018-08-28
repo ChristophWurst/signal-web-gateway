@@ -22,7 +22,7 @@ COPY	mail2signal.sh /usr/local/bin/mail2signal.sh
 
 EXPOSE	25
 
-ENV	TINI_VERSION v0.15.0
+ENV	TINI_VERSION v0.18.0
 ADD	https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
 RUN	chmod +x /tini
 ENTRYPOINT	["/tini", "--"]
