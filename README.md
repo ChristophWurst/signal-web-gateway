@@ -111,7 +111,7 @@ useradd -s /bin/bash -m signal
 
 ```
 sudo -u signal -H virtualenv /home/signal/virtualenv
-sudo -u signal -H pip install flask gunicorn
+sudo -u signal -H pip install -r requirements.txt
 ```
 
 ### App
