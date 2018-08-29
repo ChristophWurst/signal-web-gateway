@@ -2,7 +2,7 @@
 
 Putting [janimo's](https://github.com/janimo/textsecure) Signal client behind a web server to have a web gateway for other apps (reporting, monitoring, ...).
 
-You might want to check the [wiki](https://gitlab.com/morph027/signal-web-gateway/wikis/home) for more stuff (like a signal-web-gateway addon).
+You might want to check the [wiki](https://gitlab.com/morph027/signal-web-gateway/wikis/home) for more stuff (like a mail-2-signal addon).
 
 This setup runs in Docker, so you can easily throw it into your swarm or run via docker-compose. If you want to run it standalone, just have a look at the bottom of this page.
 
