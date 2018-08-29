@@ -1,0 +1,15 @@
+version: "2"
+
+services:
+
+  signal-gateway:
+    image: registry.gitlab.com/morph027/signal-web-gateway:master
+    ports:
+    - 5000:5000
+    volumes:
+      - config
+      - storage
+
+volumes:
+  config:
+  storage:
