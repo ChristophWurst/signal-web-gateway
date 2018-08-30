@@ -50,7 +50,7 @@ docker-compose -p signal-web-gateway up -d
 ### Docker
 
 ```bash
-docker run -d --name signal-web-gateway --restart always -v signal-web-gateway_config:/signal/.config -v signal-web-gateway_storage:/signal/.storage -p 5000:5000 registry.gitlab.com/morph027/signal-web-gateway:master
+docker run -d --name signal-web-gateway --restart always -v signal-web-gateway_config:/signal/.config -v signal-web-gateway_storage:/signal/.storage -p 127.0.0.1:5000:5000 registry.gitlab.com/morph027/signal-web-gateway:master
 ```
 
 ## Access
