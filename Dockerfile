@@ -27,6 +27,7 @@ RUN apk --no-cache add \
     && echo "%signal ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/signal \
     && chmod 400 /etc/sudoers.d/signal \
     && apk --no-cache add \
+      bash \
       tini \
       py-pip \
       ca-certificates \
