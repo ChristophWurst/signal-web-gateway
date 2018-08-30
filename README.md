@@ -32,9 +32,8 @@ Now you need to register your client with the signal servers. This could be done
 Edit the `.config/config.yml` to suit your needs (e.g. add your phone number and select `voice` or `sms` as authentication method) and start the registration:
 
 ```bash
-docker run --rm -it -v signal-web-gateway_config:/signal/.config -v signal-web-gateway_storage:/signal/.storage registry.gitlab.com/morph027/signal-web-gateway:master /bin/sh
-sudo chown -R 1000:1000 .storage .config
-./textsecure
+docker run --rm -it -v signal-web-gateway_config:/signal/.config -v signal-web-gateway_storage:/signal/.storage registry.gitlab.com/morph027/signal-web-gateway:master register
+Enter verification code>
 # confirm code
 # ctrl+c
 # ctrl+d
